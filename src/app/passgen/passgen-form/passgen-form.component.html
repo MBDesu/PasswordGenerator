@@ -7,7 +7,7 @@
   <mat-checkbox formControlName="upperCase">Upper-case</mat-checkbox><br />
   <ng-container *ngIf="submitted">
     <mat-form-field>
-      <textarea matInput #password [value]="generatedPassword"></textarea>
+      <textarea matInput #password [value]="generatedPassword" cdkTextareaAutosize></textarea>
     </mat-form-field>
     <button mat-icon-button type="button" color="accent" (click)="copyToClipboard()" matTooltip="Copy to clipboard"><mat-icon>content_copy</mat-icon></button>
   </ng-container>
