@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 
 @Component({
   selector: 'app-passgen-form',
@@ -13,11 +13,6 @@ export class PassgenFormComponent implements OnInit {
   passwordLengthValue = 16;
   submitted = false;
   generatedPassword = '';
-
-  // symbols: 0x21 - 0x2F; 0x3A - 0x40; 0x5B - 0x60; 0x7B - 0x7E
-  // numbers: 0x30 - 0x39
-  // lower case: 0x61 - 0x7A
-  // upper case: 0x41 - 0x5A
 
   readonly SYMBOLS = [ 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F, 0x3A,
                        0x3B, 0x3C, 0x3D, 0x3E, 0x3F, 0x40, 0x5B, 0x5C, 0x5D, 0x5E, 0x5F, 0x60, 0x7B, 0x7C, 0x7D, 0x7E ];
@@ -43,15 +38,27 @@ export class PassgenFormComponent implements OnInit {
         Validators.min(16),
         Validators.max(256)
       ])],
-      symbols: [true],
-      numbers: [true],
-      lowerCase: [true],
-      upperCase: [true]
+      checkboxes: new FormGroup({
+        symbols: new FormControl(true),
+        numbers: new FormControl(true),
+        lowerCase: new FormControl(true),
+        upperCase: new FormControl(true)
+      }, this.atLeastOneCheckedValidator)
     });
   }
 
-  formatSliderLabel(value: number): number {
-    return value;
+  private atLeastOneCheckedValidator(formGroup: FormGroup): { requireCheckboxesToBeChecked: boolean } {
+    const controls = formGroup.controls;
+    let oneChecked = false;
+    if (controls) {
+      Object.keys(controls).forEach((key) => {
+        const control = controls[key];
+        if (control.value === true) {
+          oneChecked = true;
+        }
+      });
+      return oneChecked ? null : { requireCheckboxesToBeChecked: true };
+    }
   }
 
   submit(): void {
@@ -59,7 +66,7 @@ export class PassgenFormComponent implements OnInit {
     this.submitted = true;
   }
 
-  generatePassword(): string {
+  private generatePassword(): string {
     this.initializeCharacterPool();
     const passwordLen = this.generatePasswordForm.get('passwordLength').value;
     const charPoolLen = this.characterPool.length;
@@ -73,10 +80,10 @@ export class PassgenFormComponent implements OnInit {
   private initializeCharacterPool(): void {
     this.characterPool = [];
     const form = this.generatePasswordForm;
-    const hasSymbols = form.get('symbols').value;
-    const hasNumbers = form.get('numbers').value;
-    const hasLowerCase = form.get('lowerCase').value;
-    const hasUpperCase = form.get('upperCase').value;
+    const hasSymbols = form.get('checkboxes').get('symbols').value;
+    const hasNumbers = form.get('checkboxes').get('numbers').value;
+    const hasLowerCase = form.get('checkboxes').get('lowerCase').value;
+    const hasUpperCase = form.get('checkboxes').get('upperCase').value;
     if (hasSymbols) {
       this.SYMBOLS.forEach((charCode) => {
         this.characterPool.push(String.fromCharCode(charCode));
