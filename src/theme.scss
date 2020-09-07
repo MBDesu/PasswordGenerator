@@ -1,0 +1,15 @@
+@import '~@angular/material/theming';
+
+@include mat-core();
+
+$passgen-primary: mat-palette($mat-purple);
+$passgen-accent: mat-palette($mat-green, A200, A100, A400);
+$passgen-warn: mat-palette($mat-red);
+$passgen-theme: mat-dark-theme((
+  color: (
+    primary: $passgen-primary,
+    accent: $passgen-accent,
+    warn: $passgen-warn
+  )
+));
+@include angular-material-theme($passgen-theme);
