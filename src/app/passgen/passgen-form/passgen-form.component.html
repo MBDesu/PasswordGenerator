@@ -9,12 +9,13 @@
     <mat-checkbox formControlName="upperCase">Upper-case</mat-checkbox><br />
   </div>
   <mat-error *ngIf="generatePasswordForm.controls['checkboxes'].errors && generatePasswordForm.controls['checkboxes'].errors.requireCheckboxesToBeChecked">You must select at least one character set</mat-error>
+  <br />
+  <button mat-flat-button type="submit" color="accent" [disabled]="generatePasswordForm.controls['checkboxes'].errors && generatePasswordForm.controls['checkboxes'].errors.requireCheckboxesToBeChecked">Generate</button>
+  <button *ngIf="submitted" mat-icon-button type="button" color="accent" (click)="copyToClipboard()" matTooltip="Copy to clipboard"><mat-icon>content_copy</mat-icon></button>
   <ng-container *ngIf="submitted">
+    <br />
     <mat-form-field>
       <textarea matInput #password [value]="generatedPassword" cdkTextareaAutosize></textarea>
     </mat-form-field>
-    <button mat-icon-button type="button" color="accent" (click)="copyToClipboard()" matTooltip="Copy to clipboard"><mat-icon>content_copy</mat-icon></button>
   </ng-container>
-  <br />
-  <button mat-flat-button type="submit" color="accent" [disabled]="generatePasswordForm.controls['checkboxes'].errors && generatePasswordForm.controls['checkboxes'].errors.requireCheckboxesToBeChecked">Generate</button>
 </form>
