@@ -8,6 +8,7 @@ import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms'
 })
 export class PassgenFormComponent implements OnInit {
 
+
   @ViewChild('password') generatedPasswordField: ElementRef;
   generatePasswordForm: FormGroup;
   passwordLengthValue = 16;
@@ -19,7 +20,7 @@ export class PassgenFormComponent implements OnInit {
   LOWER_CASE: number[] = [];
   UPPER_CASE: number[] = [];
   NUMBERS: number[] = [];
-  characterPool: string[] = [];
+  charsets: number[][] = [];
 
   constructor(private fb: FormBuilder) { }
 
@@ -67,43 +68,73 @@ export class PassgenFormComponent implements OnInit {
   }
 
   private generatePassword(): string {
-    this.initializeCharacterPool();
+    this.initializeCharsets();
+    const numCharsets = this.charsets.length;
+    const charsetsChosenFrom = new Set<number>();
     const passwordLen = this.generatePasswordForm.get('passwordLength').value;
-    const charPoolLen = this.characterPool.length;
     let password = '';
     for (let i = 0; i < passwordLen; i++) {
-      password += this.characterPool[Math.floor(Math.random() * charPoolLen)];
+      const charsetIndex = this.generateRandomInteger(0, numCharsets);
+      const charset = this.charsets[charsetIndex];
+      charsetsChosenFrom.add(charsetIndex);
+      password += String.fromCharCode(this.chooseRandomlyAmong(charset));
+    }
+    let unchosenCharsets = this.findUnchosenCharsets(charsetsChosenFrom, numCharsets);
+    // really stupid algorithm
+    // we just replace random characters with ones from unchosen charsets until we have at least one
+    // from each charset
+    while (unchosenCharsets.length > 0) {
+      const rndStringIndex = this.generateRandomInteger(0, password.length);
+      const randomUnchosenCharset = unchosenCharsets[this.generateRandomInteger(0, unchosenCharsets.length)];
+      const charset = this.charsets[randomUnchosenCharset];
+      charsetsChosenFrom.add(randomUnchosenCharset);
+      password = password.slice(0, rndStringIndex) +
+        String.fromCharCode(
+          this.chooseRandomlyAmong(charset)
+        ) + password.slice(rndStringIndex + 1);
+      console.log(password);
+      unchosenCharsets = this.findUnchosenCharsets(charsetsChosenFrom, numCharsets);
     }
     return password;
   }
 
-  private initializeCharacterPool(): void {
-    this.characterPool = [];
+  private initializeCharsets(): void {
+    this.charsets = [];
     const form = this.generatePasswordForm;
     const hasSymbols = form.get('checkboxes').get('symbols').value;
     const hasNumbers = form.get('checkboxes').get('numbers').value;
     const hasLowerCase = form.get('checkboxes').get('lowerCase').value;
     const hasUpperCase = form.get('checkboxes').get('upperCase').value;
     if (hasSymbols) {
-      this.SYMBOLS.forEach((charCode) => {
-        this.characterPool.push(String.fromCharCode(charCode));
-      });
+      this.charsets.push(this.SYMBOLS);
     }
     if (hasNumbers) {
-      this.NUMBERS.forEach((charCode) => {
-        this.characterPool.push(String.fromCharCode(charCode));
-      });
+      this.charsets.push(this.NUMBERS);
     }
     if (hasLowerCase) {
-      this.LOWER_CASE.forEach((charCode) => {
-        this.characterPool.push(String.fromCharCode(charCode));
-      });
+      this.charsets.push(this.LOWER_CASE);
     }
     if (hasUpperCase) {
-      this.UPPER_CASE.forEach((charCode) => {
-        this.characterPool.push(String.fromCharCode(charCode));
-      });
+      this.charsets.push(this.UPPER_CASE);
     }
+  }
+
+  private generateRandomInteger(min: number, max: number): number {
+    return Math.floor(Math.random() * (max - min) + min);
+  }
+
+  private chooseRandomlyAmong(numbers: number[]): number {
+    return numbers[this.generateRandomInteger(0, numbers.length)];
+  }
+
+  private findUnchosenCharsets(chosen: Set<number>, numCharsets: number): number[] {
+    const unchosen: number[] = [];
+    for (let i = 0; i < numCharsets; i++) {
+      if (!chosen.has(i)) {
+        unchosen.push(i);
+      }
+    }
+    return unchosen;
   }
 
   copyToClipboard(): void {

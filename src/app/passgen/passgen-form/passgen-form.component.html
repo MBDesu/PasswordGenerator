@@ -1,6 +1,7 @@
 <form [formGroup]="generatePasswordForm" (submit)="submit()">
   <mat-label>Length</mat-label><br />
   <mat-slider thumbLabel min="16" max="256" step="1" [(value)]="passwordLengthValue" formControlName="passwordLength" tickInterval="16"></mat-slider>&nbsp;&nbsp;{{ passwordLengthValue }}<br />
+  <mat-label>Rules</mat-label><br />
   <div formGroupName="checkboxes">
     <mat-checkbox formControlName="symbols">Symbols</mat-checkbox><br />
     <mat-checkbox formControlName="numbers">Numbers</mat-checkbox><br />
