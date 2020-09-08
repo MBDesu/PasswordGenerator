@@ -92,7 +92,6 @@ export class PassgenFormComponent implements OnInit {
         String.fromCharCode(
           this.chooseRandomlyAmong(charset)
         ) + password.slice(rndStringIndex + 1);
-      console.log(password);
       unchosenCharsets = this.findUnchosenCharsets(charsetsChosenFrom, numCharsets);
     }
     return password;
